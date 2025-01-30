@@ -53,20 +53,6 @@ Throughout this lab of the workshop you will see how there are many resources th
 ![UCP and k8s clusters](./img/ucpsync.png)
 
 
-## Register TKGS Supervisor in designated Tanzu Platform for k8s project
-
-> Note: This step of the workshop may be skipped if several attendees are sharing environments with the same Supervisor
-
-[Official Documentation](https://docs.vmware.com/en/VMware-Tanzu-Platform/services/create-manage-apps-tanzu-platform-k8s/how-to-register-supervisor-cluster.html)
-
-[vSphere with Tanzu documentation to register Supervisor in TMC](https://docs.vmware.com/en/VMware-vSphere/8.0/vsphere-with-tanzu-installation-configuration/GUID-ED4417DC-592C-454A-8292-97F93BD76957.html#install-the-tanzu-mission-control-agent-on-the-supervisor-1)
-
-Process:
-- Step 1: Access the Hub GUI: `Setup & Configuration > Kubernetes Management > TKG Registrations > Register TKG Instance` to get the registration url
-- Step 2: Go to VCenter: `workload management > Supervisors > Configure > Tanzu Mission Control Registration`, and add that registration url.
-
-There is an alternative process to be followed via CLI, which you can find in the focicial documentation linked above.
-
 ## Tanzu Platform Concepts and Relationships to keep handy
 As a Platform Engineer we need to be able to configure the Platform and prepare repeatable and configurable environmments for the application team to deploy applications into. These are the Spaces. But they are not the only construct that Platform Engineers need to get familiar with. Throughout this lab we will get introuced to all of them through the lens of the Platform Engineer. At a high level we need to know what these are:
 - Cluster Groups: are groupings of Kubernetes Clusters with provided Software (Capabilities) installed on those Clusters. They enable platform engineers to curate what combination of Capabilities will be provided by their platform.
@@ -87,6 +73,27 @@ Here's a conceptual diagram with how these relate to each other:
 More on this in the [Tanzu Application Engine Conceptual Overview documentation](https://docs.vmware.com/en/VMware-Tanzu-Platform/services/create-manage-apps-tanzu-platform-k8s/concepts-about-spaces.html)
 
 In a day in the life of a Platform Engineer we will start by creating a Cluster Group, to structure the underlying Kubernetes infrastructure and define the Capabilities we want to install and expose to the Application teams.
+
+## Networking
+
+Navigate to "Setup and Configuration" -> Networking
+
+- Create a certificate provider
+    name: copy name of your domain from spreadsheet
+    Certificate: copy the certificate provided in spreadsheet for your domain
+    key: copy key from spreadsheet
+- Create a domain
+    name: copy name of your domain from spreadsheet
+    DNS Provider: select jklanding.com
+    Certificate provider: Select your certificate provider from drop down
+    subdomains: turn off auto-assignable
+    allowed Subdomains: *
+    ports: turn off Auto-assignable
+    allowed ports: 443
+    Allowed spaces: *
+
+![Create Domain](./img/networking-domain.png)
+
 
 ## Prepare a Cluster Group with required capabilities
 
@@ -324,8 +331,8 @@ Access the Hub GUI: `Application Spaces > Spaces > Create Space > Step by Step`:
     - Choose the App Profile you have created earlier
     - Choose the `apps.tanzu.vmware.com` profile which include all other Traits and Capabilities you will need in this workshop.
 - Step 3: Select Avaiability Targets:
-    - Click on `Add Availability Target` and choose the AT we created earlier which targets the TKGS cluster. Set # Replicas to `1`. This will be our vsphere/TKGS Fault Domain
-    - Click on `Add Availability Target` and choose the `workshop-overflow` AT also with `1` replica. This will be our EKS Fault Domain
+    - Click on `Add Availability Target` and choose the AT we created earlier. Set # Replicas to `1`. 
+    - Click on `Add Availability Target` and choose the `workshop-overflow` AT also with `1` replica. This will be our Fault Domain
     - Notice that we can configure each AT in Active or Passive mode. We will leave both in Active mode so that the Space is scheduled in both Fault Domains and the Route53 records for both Fault Domains are also created 
 - Step 4: Click on Create Space.
 ![Create Space](./img/create-space.png)
@@ -348,11 +355,19 @@ Here's the Ingress and GSLB Architecture:
 
 Create Domain Binding
 - Access Space page and select your created space.
+- select ingress tab
 - Click Create Domain Binding and select your domain that was created in networking step.
+- Enter subdomain as app. Since we are using a wild card cert so you can use any subdmain here.
 - Save changes
 ![Domain Binding](./img/domain-binding.png)
 
 Create route
+
+- Name: name of route for your application. e.g. java-webapp
+- Path: /
+- Backend Type: Service
+- Backend Name: tanzu-java-web-app
+- port: 8080
 
 ![Create Route](./img/route.png)
 
@@ -441,15 +456,18 @@ Alternatively you can create the Space via CLI.
 
 ## Deploy a simple application to the Space to smokte-test our setup
 
-#### Deploy pre-built application
+#### Deploy an application
 As a Platform Engineer I want to deploy an application to validate that all the setup we've prepared so far (cluster grouo, cluster, profile, space) is properly configured and ready for application development teams to use.
 
 To do this validation we will deploy a smoke test application already prebuilt and available in this repo. Follow these steps using the project name you were given and the name of the space you created:
 ```
 tanzu project use <project-name>
 tanzu space use <space-name>
-cd spring-smoketest
-tanzu deploy --from-build ./pre-built
+cd spring-music
+tanzu app init
+make changes to the generated spring-music.yml and following lines
+
+
 # when propmpted with the detail of all resources that will be deployed in the space, type Y
 ```
 
