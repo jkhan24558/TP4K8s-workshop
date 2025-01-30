@@ -79,18 +79,18 @@ In a day in the life of a Platform Engineer we will start by creating a Cluster 
 Navigate to "Setup and Configuration" -> Networking
 
 - Create a certificate provider
-    name: copy name of your domain from spreadsheet
-    Certificate: copy the certificate provided in spreadsheet for your domain
-    key: copy key from spreadsheet
+    -  name: copy name of your domain from spreadsheet
+    - Certificate: copy the certificate provided in spreadsheet for your domain
+    - key: copy key from spreadsheet
 - Create a domain
-    name: copy name of your domain from spreadsheet
-    DNS Provider: select jklanding.com
-    Certificate provider: Select your certificate provider from drop down
-    subdomains: turn off auto-assignable
-    allowed Subdomains: *
-    ports: turn off Auto-assignable
-    allowed ports: 443
-    Allowed spaces: *
+    - name: copy name of your domain from spreadsheet
+    - DNS Provider: select jklanding.com
+    - Certificate provider: Select your certificate provider from drop down
+    - subdomains: turn off auto-assignable
+    - allowed Subdomains: *
+    - ports: turn off Auto-assignable
+    - allowed ports: 443
+    - Allowed spaces: *
 
 ![Create Domain](./img/networking-domain.png)
 
