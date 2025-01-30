@@ -353,7 +353,7 @@ Create Domain Binding
 ![Domain Binding](./img/domain-binding.png)
 
 Create route
-- Click Create Route
+
 ![Create Route](./img/route.png)
 
 Alternatively you can create the Space via CLI.
@@ -408,7 +408,7 @@ Alternatively you can create the Space via CLI.
     ```
 
 #### Inspect resources created in the target clusters(s)
-1. Let's access our cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](/lab-platform-engineer/01-full-lab.md#inspect-packages-and-agents-intalled) section.
+1. Let's access our cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](01-full-lab.md#inspect-packages-and-agents-intalled) section.
 
 2. Check the new namespaces
     ```
