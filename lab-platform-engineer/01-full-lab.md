@@ -309,18 +309,6 @@ Let's confirm the Availability Target is in `Ready` state.
     tk get availabilitytarget <at-name> -oyaml | yq .status
     ```
 
-#### Current Ingress and GSLB Architecture
-
-In order to configure a Space with the right Ingress and GSLB settings for apps running on the Space, we need to create a Profile that configures the Ingress Trait. And later on, developers (at the moment) must create the HTTPRoute resources with specifics of the subdomain, ports and paths to be used to route traffic to the application.
-Ingress Trait and HTTPRoute objects are the primary inputs that are used to setup networking for exposing an application.
-- The ingress trait installation brings up ingress operator pod in the Space namespace on the app cluster. This operator is responsible for programing Gateway object reading inputs from the Trait and the HTTPRoute
-- SRS(syncresourcesets) syncs the lb details and httproute details up to UCP, then the GSLB controller looks at those and updates Route53
-- SRS is basically a crd that tells a controller (srs controller running in UCP) to collect data from the downstream spaces
-- Istio uses Gateway to dynamically bring up the gateway proxy services (deployment and service) to allow public traffic into the Space.
-
-Here's the Ingress and GSLB Architecture:
-![Ingress and GSLB Architecture](./img/IngressGSLB.png)
-
 ## Profiles
 
 ## Create a Space for developers to deploy apps
@@ -346,6 +334,27 @@ While in the GUI, click on your newly created space to see details: It may take 
 ![Space Healthy](./img/space-healthy-1.png)
 
 More information will be added once apps are deployed.
+
+#### Current Ingress and GSLB Architecture
+
+Ingress Trait and HTTPRoute objects are the primary inputs that are used to setup networking for exposing an application.
+- The ingress trait installation brings up ingress operator pod in the Space namespace on the app cluster. This operator is responsible for programing Gateway object reading inputs from the Trait and the HTTPRoute
+- SRS(syncresourcesets) syncs the lb details and httproute details up to UCP, then the GSLB controller looks at those and updates Route53
+- SRS is basically a crd that tells a controller (srs controller running in UCP) to collect data from the downstream spaces
+- Istio uses Gateway to dynamically bring up the gateway proxy services (deployment and service) to allow public traffic into the Space.
+
+Here's the Ingress and GSLB Architecture:
+![Ingress and GSLB Architecture](./img/IngressGSLB.png)
+
+Create Domain Binding
+- Access Space page and select your created space.
+- Click Create Domain Binding and select your domain that was created in networking step.
+- Save changes
+![Domain Binding](./img/domain-binding.png)
+
+Create route
+- Click Create Route
+![Create Route](./img/route.png)
 
 Alternatively you can create the Space via CLI.
 - Use the `space.yaml` sample template file included in this folder of the repo and, following the same guidelines as described above for the GUI approach, make sure to adjust:
@@ -399,7 +408,7 @@ Alternatively you can create the Space via CLI.
     ```
 
 #### Inspect resources created in the target clusters(s)
-1. Let's access our TKGS cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](/lab-platform-engineer/01-full-lab.md#inspect-packages-and-agents-intalled) section.
+1. Let's access our cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](/lab-platform-engineer/01-full-lab.md#inspect-packages-and-agents-intalled) section.
 
 2. Check the new namespaces
     ```
