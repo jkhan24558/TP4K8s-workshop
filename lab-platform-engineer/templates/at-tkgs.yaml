@@ -1,0 +1,16 @@
+apiVersion: spaces.tanzu.vmware.com/v1alpha1
+kind: AvailabilityTarget
+metadata:
+  name: yourname-cluster
+  namespace: default
+spec:
+  affinity:
+    clusterAffinity:
+      clusterSelectorTerms:
+      - matchExpressions:
+          - key: "app"
+            operator: "In"
+            values:
+            - "true"
+    clusterAntiAffinity:
+      clusterSelectorTerms: []

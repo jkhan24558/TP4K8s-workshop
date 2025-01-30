@@ -1,0 +1,20 @@
+ apiVersion: spaces.tanzu.vmware.com/v1alpha1
+ kind: Space
+ metadata:
+   name: yourspace-demo
+ spec:
+   template:
+     spec:
+       profiles:
+       - name: apps.tanzu.vmware.com
+       resources:
+         limits:
+           cpu: 5000m
+           memory: 10Gi
+   availabilityTargets:
+   - name: app-at
+     replicas: 1
+   - name: workshop-overflow
+     replicas: 1
+   updateStrategy:
+     type: RollingUpdate
