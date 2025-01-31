@@ -392,6 +392,8 @@ Alternatively you can create the Space via CLI.
     user: 
     pwd: 
 
+    kubectl config use-context tkg-app-cluster
+
 2. Check the new namespaces
     ```
     kubectl get ns
@@ -403,7 +405,7 @@ Alternatively you can create the Space via CLI.
 
 3. Check contents of the app namespace
     ```
-    kubectl get pod,svc -n apps-sandbox-547849746c-mncss-internal
+    kubectl get pod,svc -n apps-sandbox-547849746c-mncss
     # we should only see the multicloiud-ingress-operator pod since no apps have been deployed yet
     NAME                                      READY   STATUS    RESTARTS   AGE
     pod/a517-istio-7b4d4b7c96-zqnv4           1/1     Running   0          9d
@@ -457,43 +459,53 @@ Build UI URL: https://platform.tanzu.broadcom.com/hub/developer-tools/builds/92c
 # cd into the /tmp/... folder
 cd /tmp/tanzu-build188914551/apps.tanzu.vmware.com.ContainerApp/tanzu-java-web-app/kubernetes-carvel-package
 # Deploy app
-Tanzu space use your-sapace
+tanzu space use your-sapace
+tanzu deploy
 # when propmpted with the detail of all resources that will be deployed in the space, type Y
 ```
 
 Access the Hub GUI: `Application Spaces > Spaces > Click in your space to view details`. The space will now show gradually:
 - Applications: the `tanzu-java-webapp` application you just deployed
-    ![Space App](./img/spaceapp.png)
-    - Click on the Space URL to access the UI and see something similar to this:
-        ![App](./img/smoketestapp.png)
-- Kubernetes Services: `spring-smoketest` service and `default-gateway-istio` service for each cluster
-    ![Space K8s Services](./img/spacek8sservices.png)
+    ![Space App](./img/view-app.png)
+- Click on the ingress to check DNS of the app. Access that URL in firefox
+
+    ![Check Domain Binding](./img/domain-binding-app.png)
+    
+    ![App](./img/app.png)
+
+- Kubernetes Services: `tanzu-java-web-app` service and `default-gateway-istio` service for each cluster
+    ![Space K8s Services](./img/services.png)
+
 - Network Topology: 2 clusters each with the 2 k8s services. As traffic flows those servies should connect visually (more on this later)
 It may take some time for the k8s services and network topology to show everything. Wait at least a minute or 2 and click `Refresh` as needed.
     ![Space Network Topology](./img/spacenetworktopology.png)
 
 #### Inspect resources created in the target clusters(s)
-1. Let's access our TKGS cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](/lab-platform-engineer/01-full-lab.md#inspect-packages-and-agents-intalled) section.
-
-2. Check contents of the app namespace
+1. Let's access our TKGS cluster
     ```
-    kubectl get pod,svc,gateway,httproute -n jaime-demo-58d6c9cf7d-wkbk9
-    # We should now see the app pod and service, as well as the Istio Gateway resource, pod and service (type LB), in addition to the multicloiud-ingress-operator` pod we already had
-    NAME                                               READY   STATUS    RESTARTS   AGE
-    pod/default-gateway-istio-59cd474cbc-8b6v4         1/1     Running   0          7m56s
-    pod/multicloud-ingress-operator-7bb85d98bc-7mrjj   1/1     Running   0          9m33s
-    pod/spring-smoketest-6c58cb6b8f-rrkcf              2/2     Running   0          7m37s
+    vsphere login --server=192.168.100.13 --insecure-skip-tls-verify --tanzu-kubernetes-cluster-name tkg-app-cluster
 
-    NAME                            TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                        AGE
-    service/default-gateway-istio   LoadBalancer   10.96.84.137   10.220.9.7    15021:31734/TCP,80:31725/TCP   7m56s
-    service/spring-smoketest        ClusterIP      10.96.77.127   <none>        8080/TCP                       7m37s
+    user: 
+    pwd: 
 
-    NAME                                                CLASS   ADDRESS      PROGRAMMED   AGE
-    gateway.gateway.networking.k8s.io/default-gateway   istio   10.220.9.7   True         7m57s
+    kubectl config use-context tkg-app-cluster
 
-    NAME                                                                  HOSTNAMES   AGE
-    httproute.gateway.networking.k8s.io/hc-8e22-spring-somoketest-route               7m57s
-    httproute.gateway.networking.k8s.io/spring-somoketest-route                       7m57s
+2. Check the new namespaces
+    ```
+    kubectl get ns
+    # we should now see two new namespaces that match with the managedspace resource name
+    NAME                                    STATUS   AGE
+    apps-sandbox-547849746c-mncss              Active   9d  # this is the namespace where the apps will be deployed
+    apps-sandbox-547849746c-mncss-internal     Active   9d  # this is an auxiliary namespace that includes the traits packages and their configuration
+    ```
+
+3. Check contents of the app namespace
+    ```
+    kubectl get pod,svc,httproute -n apps-sandbox-547849746c-mncss
+    # we should only see the multicloiud-ingress-operator pod since no apps have been deployed yet
+    NAME                                      READY   STATUS    RESTARTS   AGE
+    pod/a517-istio-7b4d4b7c96-zqnv4           1/1     Running   0          9d
+    pod/tanzu-java-web-app-6778d5978b-q9v9v   2/2     Running   0          9d
     ```
 
     Things to notice
@@ -504,52 +516,24 @@ It may take some time for the k8s services and network topology to show everythi
 
 3. Let's check the HTTPRoute resource and the Gateway resource
     ```
-    kubectl get httproute spring-somoketest-route -n jaime-demo-58d6c9cf7d-gqn78 -oyaml | yq .spec
+    kubectl get httproute java-webapp -n apps-sandbox-547849746c-mncss -oyaml | yq .spec
+
     parentRefs:
-    - group: gateway.networking.k8s.io
-        kind: Gateway
-        name: default-gateway
-        sectionName: http-spring-smoketest
+    - group: networking.tanzu.vmware.com
+        kind: Entrypoint
+        name: main
     rules:
     - backendRefs:
         - group: ""
             kind: Service
-            name: spring-smoketest
+            name: tanzu-java-web-app
             port: 8080
             weight: 1
         matches:
         - path:
             type: PathPrefix
             value: /
-
-    kubectl get gateway default-gateway -n jaime-demo-58d6c9cf7d-wkbk9 -oyaml | yq .spec
-    gatewayClassName: istio
-    listeners:
-    - allowedRoutes:
-        namespaces:
-            from: Same
-        hostname: spring-smoketest.99.tp4k8s-ws.jagapps.co
-        name: http-spring-smoketest
-        port: 80
-        protocol: HTTP
-    - allowedRoutes:
-        namespaces:
-            from: Same
-        hostname: hc-cfde.spring-smoketest.99.tp4k8s-ws.jagapps.co
-        name: http-hc-cfde.spring-smoketest
-        port: 80
-        protocol: HTTP
     ```
-
-    Let's break it down a bit:
-    - The Istio Gateway has two `allowedRoutes` one for the actual application and one for the healthcheck that the platform creates for us.  
-        - Each of these routes have a dedicatd hostname, and a corresponding DNS record created automatically (in Route53)
-    - Focusing on the application route there are a couple of things at play:
-        - When we created the Custom Networking Profile we defined two listeners with two prefixes: `http-` and `https-`
-        - In the `spec.parentRefs[0].sectionName` of the HTTPRoute we use those prefixes:
-            - To choose if we want HTTP or HTTPS.
-            - Stripping off the prefix, we get the hostname we want to use for this application.
-        - Combining that application hostname and the domain we defined in the Custom Networking Profile we get the actual application FQDN defined in the `spec.listeners[0].hostname` of the Istio Gateway, once programed.
 
 4. Let's now go to AWS Route 53 to see the DNS records and Healthchecks.
     ![Route53 Records](./img/route53records.png)
