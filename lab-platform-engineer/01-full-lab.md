@@ -209,13 +209,15 @@ tk get kubernetesclusters <cluster-name> -oyaml | yq .status.capabilities
 
 #### Inspect Packages and Agents intalled
 1. Acccess the target cluster. Two ways:
-    1. Access the Hub GUI: `Infrastructure > Kuberentes Clusters > Clusters > Click on the cluster name > Actions > Access this cluster`
-        - Download the Kubeconfig. Export the file (adjust path) and teste it with these commands
-        ```
-        tanzu project use <project-name>
-        export KUBECONFIG=/full/path/to/kconfig/kubeconfig-<cluster-name>>.yml
-        kubectl get no -owide
-        ```
+    ```
+    vsphere login --server=192.168.100.13 --insecure-skip-tls-verify --tanzu-kubernetes-cluster-name tkg-app-cluster
+
+    user: 
+    pwd: 
+
+    kubectl config use-context tkg-app-cluster
+    
+    ```
         
 2. Check the following namespaces
 ```
@@ -316,7 +318,7 @@ Access the Hub GUI: `Application Spaces > Spaces > Create Space > Step by Step`:
     - Make sure the name is under 27 characters to avoid hitting an issue with the DNS record creation process.
 - Step 2: Select the Profiles:
     - Choose the App Profile you have created earlier
-    - Choose the `apps.tanzu.vmware.com` profile which include all other Traits and Capabilities you will need in this workshop.
+    - Choose the `app-profile` profile which include all other Traits and Capabilities you will need in this workshop.
 - Step 3: Select Avaiability Targets:
     - Click on `Add Availability Target` and choose the AT we created earlier which targets the app cluster. Set # Replicas to `1`.
     - Click on `Add Availability Target` and choose the `workshop-overflow` AT also with `1` replica. This will be our Fault Domain
