@@ -182,17 +182,13 @@ Access the Hub GUI: `Infrastructure > Kuberentes Clusters > Clusters > Add Kuber
 
 #### Confirm cluster is onboarded to the Platform
 1. Confirm the Cluster is Healthy and Ready
-    - This is the TMC layer, does not provide information about the UCP onboarding
     - Access the Hub GUI: `Infrastructure > Kubernetes Clusters > Clusters` and confirm it's `Healthy` and `Ready`.
-        ![Cluster Healthy TMC](./img/cluster-healthy-tmc.png)
+        ![Cluster Health](./img/cluster.png)
     - CLI path: check status conditions
         ```
         tanzu project use <project-name>
         tanzu operations cluster get <cluster-name>
         ```
-2. Confirm the Cluster is properly onboarded to UCP
-    - Access the Hub GUI: `Setup & Configuration > Kubernetes Management` and confirm it is `Attached` and the Colector status is `Online`
-        ![Cluster Healthy UCP](./img/cluster-healthy-ucp.png)
     - CLI path: check status conditions
         ```
         tanzu operations clustergroup use <cluster-group-name>
