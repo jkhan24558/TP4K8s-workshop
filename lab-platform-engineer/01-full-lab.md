@@ -531,5 +531,5 @@ It may take some time for the k8s services and network topology to show everythi
     ```
 
 4. Let's now go to AWS Route 53 to see the DNS records and Healthchecks.
-    ![Route53 Records](./img/route53records.png)
+    ![Route53](./img/route53.png)
     - We should see 2 sets of CNAME records
