@@ -289,7 +289,7 @@ Let's confirm the Availability Target is in `Ready` state.
 - Via Hub GUI: `Application Spaces > Availability Targets`
     - Type the name of your AT in the search field and click on "View Details"
     - You should see it `Ready` and your TKG cluster should be listed in.
-    ![AT Healthy](./img/at-healthy.png)
+    ![Availibity Target](./img/at.png)
     - Bear in mind this sometimes take a few minutes, and your cluster must be fully onboarded to UCP to be considered here.
 - Via CLI, run these commands:
     ```
