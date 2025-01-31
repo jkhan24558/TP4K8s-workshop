@@ -478,7 +478,8 @@ Access the Hub GUI: `Application Spaces > Spaces > Click in your space to view d
 
 - Network Topology: 2 clusters each with the 2 k8s services. As traffic flows those servies should connect visually (more on this later)
 It may take some time for the k8s services and network topology to show everything. Wait at least a minute or 2 and click `Refresh` as needed.
-    ![Space Network Topology](./img/spacenetworktopology.png)
+
+    ![Network Topology](./img/topolygy.png)
 
 #### Inspect resources created in the target clusters(s)
 1. Let's access our TKGS cluster
@@ -507,12 +508,6 @@ It may take some time for the k8s services and network topology to show everythi
     pod/a517-istio-7b4d4b7c96-zqnv4           1/1     Running   0          9d
     pod/tanzu-java-web-app-6778d5978b-q9v9v   2/2     Running   0          9d
     ```
-
-    Things to notice
-    - The app has two containers, as it has the istio sidecar reuired for service mesh capabilities (mTLS) and observability.
-    - Ingress into the space down to the application pod is possible thanks to the Istio Gateway.
-        - The `default-istio-gateway` has the `EXTERNAL-IP/CNAME` to access the app from outisde the k8s cluster.
-        - The Istio Gateway has been `Programmed` with the domain, listerners, ports, etc that we need. Let's see that in detail next.
 
 3. Let's check the HTTPRoute resource and the Gateway resource
     ```
