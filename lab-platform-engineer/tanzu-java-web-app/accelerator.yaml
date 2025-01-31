@@ -1,0 +1,17 @@
+accelerator:
+  options:
+  - name: buildTool
+    label: Build Tool
+    inputType: select
+    required: true
+    defaultValue: maven
+    choices:
+      - value: maven
+        text: Maven (https://maven.apache.org/)
+      - value: gradle
+        text: Gradle (https://gradle.org/)
+
+  imports:
+  - name: java-version
+  - name: build-wrapper-maven
+  - name: build-wrapper-gradle

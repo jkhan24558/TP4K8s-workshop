@@ -1,7 +1,7 @@
 apiVersion: spaces.tanzu.vmware.com/v1alpha1
 kind: AvailabilityTarget
 metadata:
-  name: yourname-cluster
+  name: workshop-overflow
   namespace: default
 spec:
   affinity:

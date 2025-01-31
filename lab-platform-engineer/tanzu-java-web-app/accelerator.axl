@@ -1,0 +1,41 @@
+engine {
+
+  TextPreprocessor()
+
+  // Include files for the selected build tool
+  if (#buildTool == "maven") {
+    Exclude({"*gradle*"})
+    + InvokeFragment(reference: "build-wrapper-maven")
+  }
+  if (#buildTool == "gradle") {
+    applyTo("settings.gradle") {
+      ReplaceText({{text: "tanzu-java-web-app", with: #projectName}})  
+    }
+    {
+      Exclude({"pom.xml"})
+      + InvokeFragment(reference: "build-wrapper-gradle")
+    }
+  }
+
+  // Update the artifact name as needed
+  applyTo("README.md") {
+    ReplaceText({{text: "tanzu-java-web-app", with: #artifactId.toLowerCase()}})
+  }
+
+  // Update the artifact name and path as needed
+  applyTo(".tanzu/config/tanzu-java-web-app.yml") {
+    ReplaceText({{text: "tanzu-java-web-app", with: #artifactId.toLowerCase()}})
+    RewritePath(rewriteTo: '.tanzu/config/' + #artifactId.toLowerCase() + '.yml')
+  }
+
+  {
+    Include({'**'})
+    // Update the java version
+    + InvokeFragment(reference: "java-version")
+  }
+  UniquePath(strategy: UseLast)
+
+  // Create the provenance file
+  Provenance()
+
+}

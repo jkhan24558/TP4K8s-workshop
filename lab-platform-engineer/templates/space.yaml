@@ -6,7 +6,7 @@
    template:
      spec:
        profiles:
-       - name: apps.tanzu.vmware.com
+       - name: app.profile
        resources:
          limits:
            cpu: 5000m

@@ -1,11 +1,5 @@
 # Platform Engineer Hands-on Lab
 
-## Share Environment details and confirm pre-requisites
-The workshop owner should share with the attendees:
-- Designated Tanzu Platform for k8s URL, Org and Project.
-- vSphere environment url, credentials, Supervisor name used to register in Tanzu Platform, and Supervisor namespace name.
-- Route53 Credential ID, Hosted Zone ID, and designated subdomain.
-
 All workshop participants to verify they are all set with steps in [Workshop Attendee pre-requisites](../lab-platform-engineer/00-prerequisites.md#workshop-attendee-pre-requisites)
 
 ## Log in the Tanzu Platform for Kubernetes 
@@ -29,29 +23,20 @@ Organization
 Check what happens with the Tanzu CLI context when you target a project
 ```
 tanzu project use
-# choose a valid project from the list, e.g: workshop01
+# choose a valid project from the list, e.g: AMER-Pubsec
 tanzu context current | grep -E "Kube Context"
-#  Kube Context:    tanzu-cli-sa-tanzu-platform:workshop01
-```
-
-If there are spaces available, check what happens with the Tanzu CLI context when yu target a space. If there are no spaces available in the project yet, come back here once you create a space.
-```
-tanzu space use
-# choose a valid space from the list
-tanzu context current | grep -E "Kube Context"
-#  Kube Context:    tanzu-cli-sa-tanzu-platform:workshop01:space-name 
+#  Kube Context:    tanzu-cli-sa-tanzu-platform:AMER-Pubsec
 ```
 
 More on this in the [documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-how-to-tanzu-cli-contexts-create-and-manage-cli-contexts.html)
 
-During this workshop we will also use `kubectl` to access some UCP resources. To be able to do that you can set your `KUBECONFIG` environment variable to point to that `~/.config/tanzu/kube/config` file. Or even create an alias to only use that `KUBECONFIG` when you need to check UCP resources, and leave the default KUBECONFIG (`~/.kube/config`) fore regular use of kubectl to access the k8s clusters:
+During this workshop we will also use `kubectl` to access some UCP resources. To be able to do that you can set your `KUBECONFIG` environment variable to point to that `~/.config/tanzu/kube/config` file. Or even create an alias to only use that `KUBECONFIG` when you need to check UCP resources, and leave the default KUBECONFIG (`~/.kube/config`) for regular use of kubectl to access the k8s clusters:
 ```
 alias tk='KUBECONFIG=~/.config/tanzu/kube/config kubectl'
 ```
 
 Throughout this lab of the workshop you will see how there are many resources that are created at UCP level, and automatically copied over, and kept in sync, in the k8s clusters where applications will run. At a high level:
 ![UCP and k8s clusters](./img/ucpsync.png)
-
 
 ## Tanzu Platform Concepts and Relationships to keep handy
 As a Platform Engineer we need to be able to configure the Platform and prepare repeatable and configurable environmments for the application team to deploy applications into. These are the Spaces. But they are not the only construct that Platform Engineers need to get familiar with. Throughout this lab we will get introuced to all of them through the lens of the Platform Engineer. At a high level we need to know what these are:
@@ -70,9 +55,7 @@ As a Platform Engineer we need to be able to configure the Platform and prepare 
 Here's a conceptual diagram with how these relate to each other:
 ![Require and Provide Capabilities](./img/requireprovidecapabilities.png)
 
-More on this in the [Tanzu Application Engine Conceptual Overview documentation](https://docs.vmware.com/en/VMware-Tanzu-Platform/services/create-manage-apps-tanzu-platform-k8s/concepts-about-spaces.html)
-
-In a day in the life of a Platform Engineer we will start by creating a Cluster Group, to structure the underlying Kubernetes infrastructure and define the Capabilities we want to install and expose to the Application teams.
+More on this in the [Tanzu Application Engine Conceptual Overview documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-concepts-index.html)
 
 ## Networking
 
@@ -95,12 +78,14 @@ Navigate to "Setup and Configuration" -> Networking
 ![Create Domain](./img/networking-domain.png)
 
 
+In a day in the life of a Platform Engineer we will start by creating a Cluster Group, to structure the underlying Kubernetes infrastructure and define the Capabilities we want to install and expose to the Application teams.
+
 ## Prepare a Cluster Group with required capabilities
 
 #### Create Cluster Group
 [Official documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-how-to-operate-clusters-create-run-cluster-group.html)
 
-Access the Hub GUI: `Infrastructure > Kubedrnetes Clusters > Create Cluster Group`. Choose a name that's unique for you (e.g: name-cg)
+Access the Hub GUI: `Infrastructure > Kubedrnetes Clusters > Add Cluster Group`. Choose a name that's unique for you (e.g: name-cg)
 
 Make sure to enable Tanzu Application Engine.
 
@@ -121,20 +106,20 @@ Therefore we will do this via CLI
 
 We need to install all capabilities that we are going to need in the Spaces we want to create. Spaces request capabilities via Profiles and looking at the profiles we need to use in the workshop, these are the capabilities we want to look at:
 - Capabilities needed by the GSLB ingress Profile an its traits and capabilities
-	- Certificate Manager (several depend on this capability)
-	- Egress
-	- Ingress
-	- Gateway API
+    - Certificate Manager (several depend on this capability)
+    - Egress
+    - Ingress
+    - Gateway API
 - Additional Capabilities needed by the spring-dev profile: observability and carvel-package traits, and other capabilities
-	- Observability
-	- Service Mesh Observability
-	- Mutual TLS
-	- Bitnami
-	- Container Apps
-	- Service Binding (Tanzu Service Binding Dependency)
-	- Tanzu Service Binding
-	- Spring Cloud Gateway.tanzu.vmware.com (can be skipped if not needed by app)
-	- Crossplane (Bitnami's dependency)
+    - Observability
+    - Service Mesh Observability
+    - Mutual TLS
+    - Bitnami
+    - Container Apps
+    - Service Binding (Tanzu Service Binding Dependency)
+    - Tanzu Service Binding
+    - Spring Cloud Gateway.tanzu.vmware.com (can be skipped if not needed by app)
+    - Crossplane (Bitnami's dependency)
 > Note: Ingress and Service Mesh Observability capabilities are all provided by the same `tcs` meta package today
 
 To install the necessary capabilities run these commands
@@ -160,6 +145,7 @@ tanzu package install container-apps.tanzu.vmware.com -p container-apps.tanzu.vm
 tanzu package install servicebinding.tanzu.vmware.com -p servicebinding.tanzu.vmware.com -v '>0.0.0'
 tanzu package install tanzu-servicebinding.tanzu.vmware.com -p tanzu-servicebinding.tanzu.vmware.com -v '>0.0.0'
 tanzu package install spring-cloud-gateway.tanzu.vmware.com -p spring-cloud-gateway.tanzu.vmware.com -v '>0.0.0'
+tanzu package install ingress.tanzu.vmware.com -p ingress.tanzu.vmware.com -v '>0.0.0'
 ```
 
 After commans run return to the GUI (`Application Spaces > Capabilities > Installed`) to see all capabilities `Ready`. If the drop down menu does not show your Cluster Group, edit and go to this url with your cluster name as parameter:
@@ -277,13 +263,13 @@ tanzu-system                 vss-k8s-collector                                 v
 
 
 ## Create Availability Targets
-[Official documentation](https://docs.vmware.com/en/VMware-Tanzu-Platform/services/create-manage-apps-tanzu-platform-k8s/how-to-manage-availability-targets.html)
+[Official documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-how-to-operate-clusters-manage-availability-targets.html)
 
 #### Look at existing Availability Target pointing to our EKS overflow clusters
-- Access the Hub GUI: `Application Spaces > Availability Targets > type "workshop+ENTER" > Click on "View Details" in the workshop-overflow AT`.
+- Access the Hub GUI: `Application Spaces > Availability Targets > app-at`.
 - See the list of clusters: these are all EKS clusters we have available in our project for extra compute for our Spaces. 
 - On the top right click on `Actions > View YAML`. Scroll down to `spec.affinity.clusterAffinity`
-- Observe the matchingExpresion looking for clusters with a label `workshop-overflow`
+- Observe the matchingExpresion looking for clusters with a label `app=true`
 
 
 #### Create an Availability Target that targets our attached cluster
@@ -302,7 +288,7 @@ tanzu deploy --only templates/at-tkgs.yaml
 Let's confirm the Availability Target is in `Ready` state.
 - Via Hub GUI: `Application Spaces > Availability Targets`
     - Type the name of your AT in the search field and click on "View Details"
-    - You should see it `Ready` and your TKGS cluster should be listed in.
+    - You should see it `Ready` and your TKG cluster should be listed in.
     ![AT Healthy](./img/at-healthy.png)
     - Bear in mind this sometimes take a few minutes, and your cluster must be fully onboarded to UCP to be considered here.
 - Via CLI, run these commands:
@@ -310,11 +296,16 @@ Let's confirm the Availability Target is in `Ready` state.
     # for a nice output via tanzu CLI
     tanzu availability-target get <at-name>
 
-    # alternatively checking the status in the UCP resources
-    tanzu project use <project-name>
-    alias tk='KUBECONFIG=~/.config/tanzu/kube/config kubectl'
-    tk get availabilitytarget <at-name> -oyaml | yq .status
-    ```
+#### Current Ingress and GSLB Architecture
+
+Here's the Ingress and GSLB Architecture:
+![Ingress and GSLB Architecture](./img/IngressGSLB.png)
+
+Ingress Trait and HTTPRoute objects are the primary inputs that are used to setup networking for exposing an application.
+- The ingress trait installation brings up ingress operator pod in the Space namespace on the app cluster. This operator is responsible for programing Gateway object reading inputs from the Trait and the HTTPRoute
+- SRS(syncresourcesets) syncs the lb details and httproute details up to UCP, then the GSLB controller looks at those and updates Route53
+- SRS is basically a crd that tells a controller (srs controller running in UCP) to collect data from the downstream spaces
+- Istio uses Gateway to dynamically bring up the gateway proxy services (deployment and service) to allow public traffic into the Space.
 
 ## Profiles
 
@@ -331,7 +322,7 @@ Access the Hub GUI: `Application Spaces > Spaces > Create Space > Step by Step`:
     - Choose the App Profile you have created earlier
     - Choose the `apps.tanzu.vmware.com` profile which include all other Traits and Capabilities you will need in this workshop.
 - Step 3: Select Avaiability Targets:
-    - Click on `Add Availability Target` and choose the AT we created earlier. Set # Replicas to `1`. 
+    - Click on `Add Availability Target` and choose the AT we created earlier which targets the app cluster. Set # Replicas to `1`.
     - Click on `Add Availability Target` and choose the `workshop-overflow` AT also with `1` replica. This will be our Fault Domain
     - Notice that we can configure each AT in Active or Passive mode. We will leave both in Active mode so that the Space is scheduled in both Fault Domains and the Route53 records for both Fault Domains are also created 
 - Step 4: Click on Create Space.
@@ -340,18 +331,6 @@ Access the Hub GUI: `Application Spaces > Spaces > Create Space > Step by Step`:
 While in the GUI, click on your newly created space to see details: It may take a few seconds for the space to go from `ERROR` (red), through `WARNING` (yellow), to `READY` (green). Click on the top-right `Refresh` link to update. It should look like this:
 ![Space Healthy](./img/space-healthy-1.png)
 
-More information will be added once apps are deployed.
-
-#### Current Ingress and GSLB Architecture
-
-Ingress Trait and HTTPRoute objects are the primary inputs that are used to setup networking for exposing an application.
-- The ingress trait installation brings up ingress operator pod in the Space namespace on the app cluster. This operator is responsible for programing Gateway object reading inputs from the Trait and the HTTPRoute
-- SRS(syncresourcesets) syncs the lb details and httproute details up to UCP, then the GSLB controller looks at those and updates Route53
-- SRS is basically a crd that tells a controller (srs controller running in UCP) to collect data from the downstream spaces
-- Istio uses Gateway to dynamically bring up the gateway proxy services (deployment and service) to allow public traffic into the Space.
-
-Here's the Ingress and GSLB Architecture:
-![Ingress and GSLB Architecture](./img/IngressGSLB.png)
 
 Create Domain Binding
 - Access Space page and select your created space.
@@ -402,77 +381,88 @@ Alternatively you can create the Space via CLI.
     # resolvedProfiles: -> all profiles defined in the Space
 
     # We can get info from the generated ManagedNamespaceSet and ManagedNamespace resources
-    tk get managednamespaceset myname-prod-588d6d66b5 -o yaml
-    # for each space replica inthat managednamespaceset, we can find a managednamespace resource, with an extra suffix in the name
-    tk get myname-prod-588d6d66b5-2cjrc -oyaml .status
-    # key elements from the status outout
-    #  conditions: -> self explanatory to show scheduling status and readiness for this space replica
-    #  - type: Scheduled
-    #    message: found a matching cluster
-    #  - type: TraitsInstalled
-    #    message: Traits Installed
-    #  - type: Ready
-    #    message: Ready
-    #  placement:
-    #    cluster:
-    #      clusterGroup: jaime-cg-demo -> clsuter group the target k8s cluser belongs to, with all required capabilities
-    #      name: jaime-tkgs-demo -> target cluster that matched criteria and resources for scheduling of this space replica
-    #      namespace: default
-    #    namespace: myname-prod-588d6d66b5-2cjrc -> actual name of the namespace in the target cluster created to deploy this space replica
-    #  providedCapabilities: -> lists all the capabilities required by our space and to be statisfied by this target clusters to ensure scheduling of this replica
+    tk get managednamespaceset 
     ```
 
 #### Inspect resources created in the target clusters(s)
-1. Let's access our cluster the same way we did earlier in this workshop in the [Inspect Packages and Agents intalled](01-full-lab.md#inspect-packages-and-agents-intalled) section.
+1. Let's access our TKGS cluster
+    ```
+    vsphere login --server=192.168.100.13 --insecure-skip-tls-verify --tanzu-kubernetes-cluster-name tkg-app-cluster
+
+    user: 
+    pwd: 
 
 2. Check the new namespaces
     ```
     kubectl get ns
     # we should now see two new namespaces that match with the managedspace resource name
     NAME                                    STATUS   AGE
-    jaime-demo-58d6c9cf7d-wkbk9             Active   6m24s  # this is the namespace where the apps will be deployed
-    jaime-demo-58d6c9cf7d-wkbk9-internal    Active   6m24s  # this is an auxiliary namespace that includes the traits packages and their configuration
+    apps-sandbox-547849746c-mncss              Active   9d  # this is the namespace where the apps will be deployed
+    apps-sandbox-547849746c-mncss-internal     Active   9d  # this is an auxiliary namespace that includes the traits packages and their configuration
     ```
 
 3. Check contents of the app namespace
     ```
-    kubectl get pod,svc -n jaime-demo-58d6c9cf7d-wkbk9
+    kubectl get pod,svc -n apps-sandbox-547849746c-mncss-internal
     # we should only see the multicloiud-ingress-operator pod since no apps have been deployed yet
-    NAME                                               READY   STATUS    RESTARTS   AGE
-    pod/multicloud-ingress-operator-7bb85d98bc-7mrjj   1/1     Running   0          6m22s
-    ```
-
-4. Check the packages in the auxiliar namespace
-    ```
-    kubectl get pkgi -n jaime-demo-58d6c9cf7d-wkbk9-internal
-    # we should see all namespace-bound packages spacific to the tratis we selected in all Profiles of our Space
-    NAME                                              PACKAGE NAME                                PACKAGE VERSION   DESCRIPTION           AGE
-    carvel-package-installer.tanzu.vmware.com-9b887   carvel-package-installer.tanzu.vmware.com   0.1.10            Reconcile succeeded   8m3s
-    egress.tanzu.vmware.com-6d9f5                     egress.tanzu.vmware.com                     0.0.5             Reconcile succeeded   8m3s
-    multicloud-cert-manager.tanzu.vmware.com-86446    multicloud-cert-manager.tanzu.vmware.com    2.0.0             Reconcile succeeded   8m3s
-    multicloud-ingress.tanzu.vmware.com-8948f         multicloud-ingress.tanzu.vmware.com         0.1.5             Reconcile succeeded   8m2s
-    observability.tanzu.vmware.com-6d469              observability-traits.tanzu.vmware.com       1.0.2             Reconcile succeeded   8m2s
+    NAME                                      READY   STATUS    RESTARTS   AGE
+    pod/a517-istio-7b4d4b7c96-zqnv4           1/1     Running   0          9d
+    pod/tanzu-java-web-app-6778d5978b-q9v9v   2/2     Running   0          9d
     ```
 
 ## Deploy a simple application to the Space to smokte-test our setup
 
-#### Deploy an application
-As a Platform Engineer I want to deploy an application to validate that all the setup we've prepared so far (cluster grouo, cluster, profile, space) is properly configured and ready for application development teams to use.
+#### Deploy pre-built application
 
-To do this validation we will deploy a smoke test application already prebuilt and available in this repo. Follow these steps using the project name you were given and the name of the space you created:
 ```
 tanzu project use <project-name>
-tanzu space use <space-name>
-cd spring-music
+cd tanzu-java-web-app
 tanzu app init
-make changes to the generated spring-music.yml and following lines
+# Follow the prompt and use all default. This will generate tanzu.yaml and .tanzu folder.
+# .tanzu folder contains tanzu-java-web-app.yml
+# edit that file and below section at the same level as buildpacks
+    nonSecretEnv:
+    - name: BP_JVM_VERSION
+      value: "17"
+# run tanzu build command from root of tanzu-java-web-app folder
+tanzu build
+# you should see below output
+Using context: sa-tanzu-platform
+🔎 Finding container apps:
+  - tanzu-java-web-app
+Uploading source directory... 
+Uploaded successfully
+Submitting Build for: tanzu-java-web-app
+Submitted BuildRun with ID: 92c41858-b779-4e95-85e2-b19c5ee4051c
+Build UI URL: https://platform.tanzu.broadcom.com/hub/developer-tools/builds/92c41858-b779-4e95-85e2-b19c5ee4051c
+Waiting for logs
 
+Create Build Run
+2025-01-31T03:10:06.631Z Beginning creation of Build Run...
+2025-01-31T03:10:06.637Z Fetching container app build plan...
+2025-01-31T03:10:06.890Z Fetching build configuration...
+2025-01-31T03:10:06.933Z Creating ephemeral build space build-8b6b53bf39c1e13d...
+2025-01-31T03:10:07.022Z Waiting for managed namespace build-8b6b53bf39c1e13d to become ready...
+2025-01-31T03:10:12.197Z Waiting for space to become ready...
+2025-01-31T03:10:22.508Z Creating configured egress points in ephemeral build space...
+2025-01-31T03:10:43.019Z Copying configured secrets to ephemeral build space...
+2025-01-31T03:10:43.836Z Creating BuildRun CR in ephemeral build space...
+2025-01-31T03:10:46.106Z Finished creation of Build Run
 
+# At the end you should see below output
+Build succeeded
+Build UI URL: https://platform.tanzu.broadcom.com/hub/developer-tools/builds/92c41858-b779-4e95-85e2-b19c5ee4051c
+🏁 Wrote tanzu build output to: /tmp/tanzu-build188914551
+
+# cd into the /tmp/... folder
+cd /tmp/tanzu-build188914551/apps.tanzu.vmware.com.ContainerApp/tanzu-java-web-app/kubernetes-carvel-package
+# Deploy app
+Tanzu space use your-sapace
 # when propmpted with the detail of all resources that will be deployed in the space, type Y
 ```
 
 Access the Hub GUI: `Application Spaces > Spaces > Click in your space to view details`. The space will now show gradually:
-- Applications: the `spring-smoketest` application you just deployed
+- Applications: the `tanzu-java-webapp` application you just deployed
     ![Space App](./img/spaceapp.png)
     - Click on the Space URL to access the UI and see something similar to this:
         ![App](./img/smoketestapp.png)
@@ -563,10 +553,4 @@ It may take some time for the k8s services and network topology to show everythi
 
 4. Let's now go to AWS Route 53 to see the DNS records and Healthchecks.
     ![Route53 Records](./img/route53records.png)
-    - We should see 2 sets of CNAME records: 1 CNAME per Space replica for the app traffic and 1 CNAME per space replica for the healthchecks
-    - We should also see an A record for a TKGS Space replica, since in the TKGS case we target a VIP in the Space instead of an ELB CNAME which we target for EKS clusters
-
-
-#### Bonus lab: check DNS-based Load Balancing behavior and look for improvements
-
-## If you reached this part of the Lab successfully and your Space is in a healthy state, CONGRATULATIONS! your job as a Platform Engineer is done (for now) and your Application Development friends have now a ready to go and replicable Space where to deploy their applications.
+    - We should see 2 sets of CNAME records

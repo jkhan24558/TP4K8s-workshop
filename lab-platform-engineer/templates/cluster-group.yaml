@@ -3,7 +3,7 @@ type:
    package: vmware.tanzu.manage.v1alpha1.clustergroup
    version: v1alpha1
 fullName:
-   name: "jaime-cg-demo"
+   name: "yourname-cg-demo"
 meta:
    description: "testing creation of a TAE-enabled cluster group"
 spec:
