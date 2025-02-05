@@ -100,7 +100,7 @@ tanzu operations clustergroup create -f templates/cluster-group.yaml
 #### Add capabilities to Cluster Group
 [Official documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-how-to-operate-clusters-create-run-cluster-group.html#add-capabilities)
 
-To do this from the Hub GUI, go to: `Application Spaces > Capabilities > Available`. We can only add capabilities one by one, and curerntly you can only select a specific version, which will actually pin that version in the installed packages, which can cause issues when new Capability versions are released and their pacages bumped in the Platform (UCP).
+To do this from the Hub GUI, go to: `Capabilities > Available`. We can only add capabilities one by one, and curerntly you can only select a specific version, which will actually pin that version in the installed packages, which can cause issues when new Capability versions are released and their pacages bumped in the Platform (UCP).
 
 Therefore we will do this via CLI
 
@@ -148,7 +148,7 @@ tanzu package install spring-cloud-gateway.tanzu.vmware.com -p spring-cloud-gate
 tanzu package install ingress.tanzu.vmware.com -p ingress.tanzu.vmware.com -v '>0.0.0'
 ```
 
-After commans run return to the GUI (`Application Spaces > Capabilities > Installed`) to see all capabilities `Ready`. If the drop down menu does not show your Cluster Group, edit and go to this url with your cluster name as parameter:
+After commans run return to the GUI (`Capabilities > Installed`) to see all capabilities `Ready`. If the drop down menu does not show your Cluster Group, edit and go to this url with your cluster name as parameter:
 ```
 https://www.platform.tanzu.broadcom.com/kubernetes-operations/cluster-groups
 ```
@@ -187,13 +187,13 @@ Access the Hub GUI: `Infrastructure > Kuberentes Clusters > Clusters > Add Kuber
     - CLI path: check status conditions
         ```
         tanzu project use <project-name>
-        tanzu operations cluster get <cluster-name>
+        tanzu operations cluster get <cluster-name> -m attached -p attached
         ```
     - CLI path: check status conditions
         ```
         tanzu operations clustergroup use <cluster-group-name>
         alias tk='KUBECONFIG=~/.config/tanzu/kube/config kubectl'
-        tk get kubernetesclusters <cluster-name> -oyaml | yq .status.conditions
+        tk get kubernetesclusters <cluster-name> -m attached -p attached -oyaml | yq .status.conditions
         # this actually doesn't show the collector online status.
         ```
 
@@ -204,7 +204,7 @@ To check the cluster has all the capabilities we initially defined at cluster-gr
 tanzu project use <project-name>
 tanzu operations clustergroup use <cluster-group-name>
 alias tk='KUBECONFIG=~/.config/tanzu/kube/config kubectl'
-tk get kubernetesclusters <cluster-name> -oyaml | yq .status.capabilities
+tk get kubernetesclusters <cluster-name> -m attached -p attached -oyaml | yq .status.capabilities
 ```
 
 #### Inspect Packages and Agents intalled
@@ -264,7 +264,7 @@ tanzu-system                 vss-k8s-collector                                 v
 [Official documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-how-to-operate-clusters-manage-availability-targets.html)
 
 #### Look at existing Availability Target pointing to our EKS overflow clusters
-- Access the Hub GUI: `Application Spaces > Availability Targets > app-at`.
+- Access the Hub GUI: `Spaces > Availability Targets > app-at`.
 - See the list of clusters: these are all EKS clusters we have available in our project for extra compute for our Spaces. 
 - On the top right click on `Actions > View YAML`. Scroll down to `spec.affinity.clusterAffinity`
 - Observe the matchingExpresion looking for clusters with a label `app=true`
@@ -284,7 +284,7 @@ tanzu deploy --only templates/at-tkgs.yaml
 ```
 
 Let's confirm the Availability Target is in `Ready` state.
-- Via Hub GUI: `Application Spaces > Availability Targets`
+- Via Hub GUI: `Spaces > Availability Targets`
     - Type the name of your AT in the search field and click on "View Details"
     - You should see it `Ready` and your TKG cluster should be listed in.
     ![Availibity Target](./img/at.png)
@@ -312,7 +312,7 @@ Ingress Trait and HTTPRoute objects are the primary inputs that are used to setu
 #### Create Space in the Project
 [Official documentation](https://techdocs.broadcom.com/us/en/vmware-tanzu/platform/tanzu-platform/saas/tnz-platform/spaces-getting-started-create-app-envmt.html#create-a-space-in-proj)
 
-Access the Hub GUI: `Application Spaces > Spaces > Create Space > Step by Step`:
+Access the Hub GUI: `Spaces > Create Space > Step by Step`:
 - Step 1: Name your Space:
     - Choose a uniuque name, the convention we will use in this workshop is to provide some notion of the apps lifecycle. Example `yourname-demo`:
     - Make sure the name is under 27 characters to avoid hitting an issue with the DNS record creation process.
@@ -462,7 +462,7 @@ tanzu deploy
 # when propmpted with the detail of all resources that will be deployed in the space, type Y
 ```
 
-Access the Hub GUI: `Application Spaces > Spaces > Click in your space to view details`. The space will now show gradually:
+Access the Hub GUI: `Spaces > Click in your space to view details`. The space will now show gradually:
 - Applications: the `tanzu-java-webapp` application you just deployed
     ![Space App](./img/view-app.png)
 - Click on the ingress to check DNS of the app. Access that URL in firefox
