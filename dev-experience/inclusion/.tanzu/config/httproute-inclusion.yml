@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  annotations:
+    apps.tanzu.vmware.com/promotable: ""
+    apps.tanzu.vmware.com/promote-group: ContainerApp/inclusion
+  name: inclusion-http-route
+spec:
+  parentRefs:
+  - group: networking.tanzu.vmware.com
+    kind: Entrypoint
+    name: inclusion
+  rules:
+  - backendRefs:
+    - kind: Service
+      name: inclusion
+      port: 8080
