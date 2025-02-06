@@ -12,3 +12,7 @@ spec:
   ports:
   - name: main
     port: 8080
+  replicas: 2
+  resources:
+    cpu: "400"
+    memory: "678"

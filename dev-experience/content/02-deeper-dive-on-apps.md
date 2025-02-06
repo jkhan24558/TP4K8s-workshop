@@ -1,3 +1,27 @@
+
+---
+title: Deploy our First App
+---
+![Image showing an App deployed to a Space](./images/deploy-an-app.png)
+
+Now that we have the CLI configured, let's get our first app running on Tanzu Platform.
+
+We'll be using a sample application to go through the workshop.  Let's clone the project into our workshop environment.
+```
+git clone https://github.com/timosalm/emoji-inclusion inclusion
+```
+
+Now, we need to add some configuration so that the platform understands the name, and location of the source code of our application.  We'll first change directories to the app we just cloned.
+
+```
+cd inclusion
+```
+
+Next, we'll use the `tanzu app init` command to add the default configuration for our application.
+
+```
+tanzu app init
+```
 ---
 title: Diving Deeper on Apps
 ---

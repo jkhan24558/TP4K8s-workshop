@@ -6,7 +6,7 @@ title: Scalability and Resiliency
 Tanzu Platform for Kubernetes makes it simple to scale your application resources vertically and horizontally for performance and resilience. We'll explore the different options for scaling your applications.
 
 First, let's have a look at our application details.
-```execute
+```
 tanzu app get inclusion
 ```
 
@@ -18,20 +18,20 @@ The units for memory are Megabytes, and the units for CPU are "[millicores](http
 
 
 Let's vertically scale our application by requesting more CPU and memory resources to be allocated for our application container in the "on-disk" configuration for our application.
-```execute
+```
 tanzu app config scale set cpu=400 memory=678
 ```
 
 We can have a look at the change to our "on-disk" configuration to see the new section that was added.
 ```editor:select-matching-text
-file: ~/inclusion/.tanzu/config/inclusion.yml
+cat .tanzu/config/inclusion.yml
 text: "resources:"
 before: 0
 after: 2
 ```
 
 But when we look at the running application config again, we won't see these changes yet.
-```execute
+```
 tanzu app get inclusion
 ```
 
@@ -46,7 +46,7 @@ tanzu app get inclusion
 ```
 
 Great! Our application now has some more CPU and memory to work with. However vertical scaling has its limits.  The machines that are actually running our applications have limited CPU and memory.  We can get around this limitation by horizontally scaling our application by adding more replicas of it running in each cluster. The great thing is that the platform will automatically handle splitting requests across both of our instances and check the health of each instance to determine if it can still handle requests.  Let's scale our application up to 2 replicas.
-```execute
+```
 tanzu app config scale set replicas=2
 ```
 
@@ -56,7 +56,7 @@ tanzu deploy -y
 ```
 
 Wait until the deployment is finished.  When we look at the running application config again, we'll see the replica count is now 2.
-```execute
+```
 tanzu app get inclusion
 ```
 
