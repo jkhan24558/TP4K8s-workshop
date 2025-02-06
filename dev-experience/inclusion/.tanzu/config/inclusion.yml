@@ -3,6 +3,10 @@ kind: ContainerApp
 metadata:
   name: inclusion
 spec:
+  acceptedServiceBindings:
+  - name: db
+    types:
+    - postgresql
   build:
     buildpacks: {}
     nonSecretEnv:
