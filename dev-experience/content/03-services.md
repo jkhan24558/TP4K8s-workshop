@@ -1,6 +1,4 @@
----
-title: Services
----
+### Services
 ![Image showing an application with an arrow representing a ServiceBinding to a Postgres Database](./images/services.png)
 
 It's fairly typical that an application relies on some externally managed resources like databases, OAuth servers, caches, messaging servers and others to run.  Tanzu Platform for Kubernetes provides a way for platform teams to consolidate all the services that have the best support in your organization into a single catalog and enables application developers to consume those services by simply binding them to their applications.  
@@ -8,7 +6,7 @@ It's fairly typical that an application relies on some externally managed resour
 Let's explore binding platform-managed and externally-managed services to our application.
 
 All of the service management commands are grouped under the `tanzu service` category in the CLI.  Call the following command to see the types of operations you can perform.
-```execute
+```
 tanzu service --help
 ```
 
@@ -23,8 +21,11 @@ tanzu service type list
 
 Our application can use PostgreSQL databases, and our platform team has made that type of service available to us.  Let's create an instance of that service so that we can use it with our app.  The `tanzu service create TYPE/NAME` command allows us to create a service of a specified TYPE and give it the name of NAME.  As you can see in the list of service types, we have a type called `PostgreSQLInstance` that looks promising.  Let's create an instance of that called `my-db` with the following command.
 ```
-tanzu service create PostgreSQLInstance/my-db
+tanzu service create PostgreSQLInstance/my-db --skip-bind-prompt
 ```
+
+You can also use interactive prompt to provision a new service or attach a pre-provisioned service
+![Provision service](./images/service.png)
 
 Great! Now we can have a look at the list of services in our space. We should only have the one we just created called `my-db`.
 ```
@@ -51,6 +52,9 @@ We're working with a Spring Boot application, and our platform team is using the
 tanzu service bind PostgreSQLInstance/my-db ContainerApp/inclusion --as db
 ```
 
+You can also follow interactive prompt
+![Bind service](./images/binding.png)
+
 Let's refresh our application and see that the emoji and the text in the header have changed for our app (from "powered by H2" to "powered by POSTGRESQL"). ![Image showing change to Inclusion app to show "powered by PostgreSQL" instead of "powered by H2"](./images/inclusion-postgres-binding.png)
 
 If you don't see a change immediately, retry after waiting for 1 minute or so.  Changes to the application are rolled out gracefully, and load is not shifted to the new version of your application until it is healthy.  You can go to https://www.mgmt.cloud.vmware.com/hub/application-engine/space/details/{{< param  session_name >}}/topology to see the URL for your application if you accidentally closed the tab for it.  Click on the "Space URL" link at the upper middle of the page.
@@ -61,9 +65,8 @@ The PostgreSQL service we are using is provisioned using automation for us in th
 
 If we have a look at the [PostgreSQL section in the Spring Cloud Bindings README.md](https://github.com/spring-cloud/spring-cloud-bindings?tab=readme-ov-file#postgresql-rdbms), we can see that we need to include a `username`, and `password` setting.  We then can either specify a `jdbc-url` setting or the `host`, `port`, `database` values.  We can optionally add in additional configuration with the `sslmode`, `sslrootcert`, and `options` values if we need to fine-tune the connection. 
 
-And to help preserve resources, let's delete that small database instance since we won't need it anymore.
 
-Great! The platform will restart our application to get it to pick up on the new binding. Let's refresh our application and see that the emoji has changed again for our app.  And as other users use the shared database, you'll start to see more emojis show up. You can go to https://www.mgmt.cloud.vmware.com/hub/application-engine/space/details/{{< param  session_name >}}/topology to see the URL for your application if you accidentally closed the tab for it. Click on the "Space URL" link at the upper middle of the page.
+Great! The platform will restart our application to get it to pick up on the new binding. Let's refresh our application and see that the emoji has changed again for our app.  And as other users use the shared database, you'll start to see more emojis show up.
 
 Remember in the section where we dove deeper into the application configuration and added contact metadata to our app?  We can also add information for application operators who need to deploy our app to other environments about the service bindings our application supports.  We can use `tanzu app config servicebinding` command to add information about the name of the binding and the types of services we support. First, let's display the service catalog on our platform again.
 
@@ -72,16 +75,13 @@ tanzu service type list
 ```
 
 Notice that the output shows a `TYPE` column and a `BINDING TYPE` column.  We want to make sure to specify the value of the `BINDING TYPE` for the `TYPE` of service we allow.  So, since we support the `PostgreSQLInstance` service type, we'll want to specify `postgresql` in our `tanzu app config servicebinding` command.  Let's add a service binding reference with the alias `db` and binding type of `postgresql` to our application configuration.
-```execute
+```
 tanzu app config servicebinding set db=postgresql
 ```
 
 Now, have a look at the `inclusion/.tanzu/config/inclusion.yml` file to see the new binding reference.
-```editor:select-matching-text
-file: ~/inclusion/.tanzu/config/inclusion.yml
-text: "  - name: db"
-before: 0
-after: 2
+```
+cat ~/inclusion/.tanzu/config/inclusion.yml
 ```
 We can see the reference to our accepted service binding!  If our application supports multiple types of databases, we could add more types to the yaml file directly, or we can call the `tanzu app config servicebinding set db=<new-type>` command again replacing the `<new-type>` text with the additional binding type we support.
 
