@@ -37,10 +37,13 @@ cat ~/inclusion/tanzu.yml
 
 Notice the `configuration` section.
 ```
-cat ~/inclusion/tanzu.yml
-text: "configuration"
-before: 0
-after: 3
+apiVersion: config.tanzu.vmware.com/v1
+configuration:
+  dev:
+    paths:
+    - .tanzu/config/
+  id: config-2117fe00-c260-4ad6-bca9-2e47035175e5
+kind: TanzuConfig
 ```
 You can see this section contains an array of paths, but has just one entry in it. And that path entry corresponds to the application configuration for the "inclusion" app we cloned.  
 You could have multiple entries under the path section, each pointing to a different microservice.  Also, you could have multiple application configuration files at the path we have in our `tanzu.yml` file.
@@ -71,9 +74,20 @@ tanzu app config build non-secret-env set BP_JVM_VERSION=21
 If we have a look back at the `inclusion.yaml` file, we can see it was updated for us by the CLI with the value of 21 for the `BP_JVM_VERSION` build environment variable.
 ```
 cat ~/inclusion/.tanzu/config/inclusion.yml
-text: "name: BP_JVM_VERSION"
-before: 0
-after: 1
+apiVersion: apps.tanzu.vmware.com/v1
+kind: ContainerApp
+metadata:
+  name: inclusion
+spec:
+  build:
+    buildpacks: {}
+    nonSecretEnv:
+    - name: BP_JVM_VERSION
+      value: "21"
+    path: ../..
+  ports:
+  - name: main
+    port: 8080
 ```
 
 We can also use `tanzu app config` to set environment variables that would be applied to the running application once it is deployed.  Let's turn up the logging for our application based on Spring Boot by specifying an application configuration property for logging via an environment variable.
@@ -83,10 +97,9 @@ tanzu app config non-secret-env set LOGGING_LEVEL_COM_EXAMPLE_EMOJIINCLUSION=DEB
 Again, we can see the configuration update in our application's manifest.
 ```
 cat ~/inclusion/.tanzu/config/inclusion.yml
-text: "name: LOGGING_LEVEL_COM_EXAMPLE_EMOJIINCLUSION"
-before: 0
-after: 1
 ```
+
+Before we deploy this application, let's create a domain binding and route.
 
 ```
 tanzu domain-binding create inclusion --domain inclusion.yoursubdomain.jklanding.com --entrypoint inclusion --port 443
@@ -97,15 +110,12 @@ space->ingress-Create Route
 
 ![Image showing ContainerApp lifecycle](./images/containerapp-lifecyle.png)
 
-Remember, all we have done at this point is just update our on-disk configuration files.  We could make these changes take effect by building and deploying a new container for our application with the `tanzu deploy` command like we did at the begining of the workshop.
-
 We can also break up that flow into **two separate steps** if we wish.  We can call a `tanzu build` and then deploy the built application with `tanzu deploy` without building it again. This can be extremely useful if we want to integrate this build process into our own CI pipeline tools.
 
 Let's kick off just the build for our container in our second terminal window.
 ```
 cd inclusion
 tanzu build --output-dir ~/build
-
 ```
 
 You can see that `tanzu build` is invoking the Cloud Native Buildpacks, and you should be able to see in the output that version 21 of the Java Virtual Machine was installed instead of version 17.  The line in the output you are looking for contains the text `BellSoft Liberica JDK 21.0.3`.
@@ -127,9 +137,6 @@ tanzu app config contact set team slack
 Let's have a peek back at our application configuration file to see how it has been modified with these additional values.
 ```
 cat ~/inclusion/.tanzu/config/inclusion.yml
-text: "contact:"
-before: 0
-after: 3
 ```
 
 We had a look at the Tanzu Platform UI earlier to get some details about our application. Let's use the CLI to do the same.  
@@ -154,7 +161,3 @@ Notice anything different about this flow?  We already had a built container ima
 ```
 tanzu app get inclusion
 ```
-
-Fantastic!  We explored in more detail how the CLI manages on-disk configurations for our application, allows us to split up the build and deploy steps if desired, allows us to configure the way the container image is built, and allows us to set environment variables for the running application container.
-
-An application is rarely solely made up of just your custom code.  Applications often need access to pre-built services like messaging servers, and databases.  In the next section, we'll explore how Tanzu Platform for Kubernetes makes it easy for you to use these types of services and others that your platform team and service providers have curated for you.
