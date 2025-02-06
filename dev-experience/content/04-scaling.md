@@ -51,8 +51,8 @@ tanzu app config scale set replicas=2
 ```
 
 Again, the previous command just changed the on-disk config, so we need to call the `tanzu deploy` command again to get the installation values regenerated and applied to the platform.
-```execute
-tanzu deploy -y
+```
+tanzu deploy -y --patch
 ```
 
 Wait until the deployment is finished.  When we look at the running application config again, we'll see the replica count is now 2.

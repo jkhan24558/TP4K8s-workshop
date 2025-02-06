@@ -147,7 +147,7 @@ Also, notice that we see an environment variable set for our app, but we don't s
 
 Although we have built a new version of our application with those values set, we haven't deployed it to the platform yet.  We've only modified the configuration for the application locally. We can apply the updated container image and manifests now using a modified form of the `tanzu deploy` command.
 ```
-tanzu deploy --from-build ~/build -y
+tanzu deploy --patch --from-build ~/build -y
 ```
 
 Notice anything different about this flow?  We already had a built container image, so we didn't need to run that step again. We simply need to update the configurations in our space, and the platform will roll out our updates to our cluster. If we look at the details for our application again, we should see all the changes we had made are now applied to our running application.
